@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}与 {{ user.username }} 的对话{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">与 {{ user.username }} 的对话</h2>
+
+<div class="post-card">
+    <div class="message-list mb-4" style="max-height: 400px; overflow-y: auto;">
+        {% for message in messages %}
+        <div class="message {% if message.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %} mb-3">
+            <div class="d-flex {% if message.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+                <div class="message-content p-3 rounded 
+                     {% if message.sender_id == current_user.id %}bg-primary-light{% else %}bg-secondary-light{% endif %}">
+                    <div class="message-text">{{ message.content }}</div>
+                    <div class="message-time text-muted small mt-1">
+                        {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% if message.sender_id == current_user.id and message.is_read %}
+                        <i class="fas fa-check-double text-primary"></i>
+                        {% elif message.sender_id == current_user.id %}
+                        <i class="fas fa-check text-muted"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <form method="POST" action="{{ url_for('advanced.send_message', user_id=user.id) }}">
+        <div class="mb-3">
+            <textarea class="form-control" name="content" rows="3" placeholder="输入消息..." required></textarea>
+        </div>
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">发送消息</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

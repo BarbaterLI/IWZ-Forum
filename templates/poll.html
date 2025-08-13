@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}投票{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">投票</h2>
+
+<div class="post-card">
+    <h3 class="post-title">{{ poll.title }}</h3>
+    <div class="post-meta">
+        <i class="fas fa-user"></i> {{ poll.author.username }} 
+        <i class="fas fa-clock ms-3"></i> {{ poll.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+    
+    <form method="POST" class="mt-4">
+        {% for option in poll.options %}
+        <div class="form-check mb-2">
+            <input class="form-check-input" type="radio" name="option" id="option{{ option.id }}" value="{{ option.id }}" 
+                   {% if current_user_vote and current_user_vote.option_id == option.id %}checked{% endif %}
+                   {% if current_user_vote %}disabled{% endif %}>
+            <label class="form-check-label" for="option{{ option.id }}">
+                {{ option.text }}
+            </label>
+            {% if current_user_vote %}
+            <div class="progress mt-1 poll-progress">
+                <div class="progress-bar" role="progressbar" 
+                     style="width: {{ option.percentage|default(0)|round(0)|int }}%" 
+                     aria-valuenow="{{ option.percentage|default(0)|round(0)|int }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100" 
+                     aria-label="{{ option.text }}: {{ option.percentage|default(0)|round(1) }}%">
+                </div>
+            </div>
+            <small class="text-muted">{{ option.vote_count|default(0) }} 票 ({{ option.percentage|default(0)|round(1) }}%)</small>
+            {% endif %}
+        </div>
+        {% endfor %}
+        
+        {% if not current_user_vote %}
+        <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-primary">投票</button>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-3 mb-0">
+            您已投票: {{ current_user_vote.option.text }}
+        </div>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

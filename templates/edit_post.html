@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}编辑帖子 - {{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="post-card">
+    <h2 class="mb-4">编辑帖子</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="title" class="form-label">标题</label>
+            <input type="text" class="form-control" id="title" name="title" value="{{ post.title }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="category_id" class="form-label">版块</label>
+            <select class="form-select" id="category_id" name="category_id" required>
+                <option value="">请选择版块</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == post.category_id %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">内容</label>
+            <textarea class="form-control" id="content" name="content" rows="10">{{ post.content }}</textarea>
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="btn btn-secondary">取消</a>
+            <button type="submit" class="btn btn-primary">更新帖子</button>
+        </div>
+    </form>
+</div>
+
+<!-- 引入SimpleMDE Markdown编辑器 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+    // 等待DOM加载完成后再初始化编辑器
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化SimpleMDE编辑器
+        var simplemde = new SimpleMDE({
+            element: document.getElementById("content"),
+            spellChecker: false,
+            autosave: {
+                enabled: true,
+                uniqueId: "edit-post-content-{{ post.id }}",
+                delay: 1000,
+            },
+            toolbar: [
+                "bold", "italic", "strikethrough", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "|",
+                "preview", "side-by-side", "fullscreen", "|",
+                "guide"
+            ],
+            placeholder: "请输入帖子内容，支持Markdown语法...",
+        });
+    });
+</script>
+{% endblock %}

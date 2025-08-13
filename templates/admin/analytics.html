@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}后台管理 - 数据统计{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">数据统计</h2>
+    <a href="{{ url_for('advanced.admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>返回仪表板
+    </a>
+</div>
+
+<!-- 统计卡片 -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-header">总用户数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ user_stats | sum(attribute='count') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-header">总帖子数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ post_stats | sum(attribute='count') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-header">总回复数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ comment_stats | sum(attribute='count') }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-header">总版块数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ categories | length }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 图表区域 -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">数据趋势图</h4>
+            </div>
+            <div class="card-body">
+                <canvas id="analyticsChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 详细统计表格 -->
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">用户增长统计</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>日期</th>
+                                <th>新增用户数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in user_stats %}
+                            <tr>
+                                <td>{{ stat.date }}</td>
+                                <td>{{ stat.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">帖子增长统计</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>日期</th>
+                                <th>新增帖子数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in post_stats %}
+                            <tr>
+                                <td>{{ stat.date }}</td>
+                                <td>{{ stat.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">回复增长统计</h4>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>日期</th>
+                                <th>新增回复数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for stat in comment_stats %}
+                            <tr>
+                                <td>{{ stat.date }}</td>
+                                <td>{{ stat.count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 准备图表数据 (使用JSON格式)
+        const userStats = {{ user_stats | tojson }};
+        const postStats = {{ post_stats | tojson }};
+        const commentStats = {{ comment_stats | tojson }};
+        
+        // 提取所有唯一的日期
+        const allDates = [...new Set([...userStats.map(s => s.date), ...postStats.map(s => s.date), ...commentStats.map(s => s.date)])];
+        allDates.sort();
+        
+        // 创建图表
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: allDates,
+                datasets: [
+                    {
+                        label: '用户增长',
+                        data: allDates.map(function(date) {
+                            const stat = userStats.find(function(s) { return s.date === date; });
+                            return stat ? stat.count : 0;
+                        }),
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1
+                    },
+                    {
+                        label: '帖子增长',
+                        data: allDates.map(function(date) {
+                            const stat = postStats.find(function(s) { return s.date === date; });
+                            return stat ? stat.count : 0;
+                        }),
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    },
+                    {
+                        label: '回复增长',
+                        data: allDates.map(function(date) {
+                            const stat = commentStats.find(function(s) { return s.date === date; });
+                            return stat ? stat.count : 0;
+                        }),
+                        borderColor: 'rgb(153, 102, 255)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: '论坛数据趋势'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

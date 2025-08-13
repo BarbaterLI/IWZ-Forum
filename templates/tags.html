@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}标签{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">标签</h2>
+
+<div class="post-card">
+    <h4 class="mb-4">热门标签</h4>
+    <div class="tag-cloud">
+        {% for tag, count in tag_stats %}
+        <a href="{{ url_for('advanced.tag_detail', tag_id=tag.id) }}" class="tag-link">
+            <span class="tag">{{ tag.name }}</span>
+            <span class="tag-count">{{ count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

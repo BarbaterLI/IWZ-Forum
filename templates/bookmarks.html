@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}我的收藏{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">我的收藏</h2>
+
+{% if bookmarks.items %}
+    {% for bookmark in bookmarks.items %}
+    <div class="post-card">
+        <h3 class="post-title">
+            <a href="{{ url_for('main.post_detail', post_id=bookmark.post.id) }}" class="text-decoration-none">{{ bookmark.post.title }}</a>
+        </h3>
+        <div class="post-meta">
+            <i class="fas fa-user"></i> {{ bookmark.post.author.username }} 
+            <i class="fas fa-clock ms-3"></i> {{ bookmark.post.created_at.strftime('%Y-%m-%d %H:%M') }}
+            <i class="fas fa-folder ms-3"></i> {{ bookmark.post.category.name }}
+        </div>
+        <div class="post-content">
+            {{ bookmark.post.content[:200] }}{% if bookmark.post.content|length > 200 %}...{% endif %}
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <form method="POST" action="{{ url_for('advanced.remove_favorite', post_id=bookmark.post.id) }}">
+                <button type="submit" class="btn btn-outline-danger btn-sm">取消收藏</button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- 分页 -->
+    {% if bookmarks.pages > 1 %}
+    <nav aria-label="收藏分页">
+        <ul class="pagination justify-content-center">
+            {% if bookmarks.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('advanced.favorites', page=bookmarks.prev_num) }}">上一页</a>
+            </li>
+            {% endif %}
+            
+            {% for page_num in bookmarks.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != bookmarks.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.favorites', page=page_num) }}">{{ page_num }}</a>
+                    </li>
+                    {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                    {% endif %}
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">…</span>
+                </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if bookmarks.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('advanced.favorites', page=bookmarks.next_num) }}">下一页</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+{% else %}
+    <div class="post-card">
+        <p class="text-center">您还没有收藏任何帖子。</p>
+    </div>
+{% endif %}
+{% endblock %}

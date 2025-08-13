@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block title %}互动历史{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">互动历史</h2>
+    <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>返回个人中心
+    </a>
+</div>
+
+<!-- 导航标签页 -->
+<ul class="nav nav-tabs mb-4" id="interactionsTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">我的评论</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="votes-tab" data-bs-toggle="tab" data-bs-target="#votes" type="button" role="tab">我的投票</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="interactionsTabContent">
+    <!-- 我的评论 -->
+    <div class="tab-pane fade show active" id="comments" role="tabpanel">
+        {% if comments %}
+        <div class="row">
+            {% for comment in comments %}
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-subtitle text-muted">
+                                评论于 <a href="{{ url_for('main.post_detail', post_id=comment.post.id) }}">{{ comment.post.title }}</a>
+                            </h6>
+                            <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="card-text">{{ comment.content[:100] }}{% if comment.content|length > 100 %}...{% endif %}</p>
+                        <div class="mt-2">
+                            {% set upvotes, downvotes = comment.get_vote_count() %}
+                            <span class="badge bg-success"><i class="fas fa-thumbs-up me-1"></i> {{ upvotes }}</span>
+                            <span class="badge bg-danger"><i class="fas fa-thumbs-down me-1"></i> {{ downvotes }}</span>
+                        </div>
+                        <a href="{{ url_for('main.post_detail', post_id=comment.post.id) }}#comment-{{ comment.id }}" class="btn btn-sm btn-outline-primary">查看评论</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
+            <p class="text-muted">您还没有发表过评论</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- 我的投票 -->
+    <div class="tab-pane fade" id="votes" role="tabpanel">
+        {% if votes %}
+        <div class="row">
+            {% for vote in votes %}
+            <div class="col-12 mb-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="card-subtitle text-muted">
+                                {% if vote.voted_type == 'post' %}
+                                    投票于帖子
+                                {% else %}
+                                    投票于评论
+                                {% endif %}
+                            </h6>
+                            <small class="text-muted">{{ vote.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="card-text">
+                            {% if vote.voted_type == 'post' %}
+                                {% set post = Post.query.get(vote.voted_id) %}
+                                {% if post %}
+                                    <a href="{{ url_for('main.post_detail', post_id=post.id) }}">{{ post.title }}</a>
+                                {% else %}
+                                    已删除的帖子
+                                {% endif %}
+                            {% else %}
+                                {% set comment = Comment.query.get(vote.voted_id) %}
+                                {% if comment %}
+                                    评论内容: {{ comment.content[:50] }}{% if comment.content|length > 50 %}...{% endif %}
+                                {% else %}
+                                    已删除的评论
+                                {% endif %}
+                            {% endif %}
+                        </p>
+                        <span class="badge {% if vote.vote_type == 1 %}bg-success{% else %}bg-danger{% endif %}">
+                            {% if vote.vote_type == 1 %}赞{% else %}踩{% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-vote-yea fa-3x text-muted mb-3"></i>
+            <p class="text-muted">您还没有进行过投票</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

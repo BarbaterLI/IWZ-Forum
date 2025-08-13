@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}后台管理 - 举报处理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">举报处理</h2>
+    <a href="{{ url_for('advanced.admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>返回仪表板
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">举报列表</h4>
+            <span class="badge bg-primary">总计 {{ reports.total }} 举报</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>举报人</th>
+                        <th>类型</th>
+                        <th>内容</th>
+                        <th>理由</th>
+                        <th>状态</th>
+                        <th>举报时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports.items %}
+                    <tr>
+                        <td>{{ report.id }}</td>
+                        <td>
+                            <a href="{{ url_for('main.user_detail', user_id=report.reporter.id) }}" class="text-decoration-none">
+                                {{ report.reporter.username }}
+                            </a>
+                        </td>
+                        <td>
+                            {% if report.reported_type == 'post' %}
+                            <span class="badge bg-primary">帖子</span>
+                            {% elif report.reported_type == 'comment' %}
+                            <span class="badge bg-info">评论</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if report.reported_type == 'post' %}
+                                {% set post = report.reported %}
+                                <a href="{{ url_for('main.post_detail', post_id=report.reported_id) }}" class="text-decoration-none">
+                                    {{ post.title[:30] if post else '已删除' }}
+                                </a>
+                            {% elif report.reported_type == 'comment' %}
+                                {% set comment = report.reported %}
+                                <a href="{{ url_for('main.post_detail', post_id=comment.post.id) if comment else '#' }}" class="text-decoration-none">
+                                    {{ comment.content[:30] if comment else '已删除' }}
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span title="{{ report.reason }}">{{ report.reason[:50] }}{% if report.reason|length > 50 %}...{% endif %}</span>
+                        </td>
+                        <td>
+                            {% if report.status == 'pending' %}
+                            <span class="badge bg-warning">待处理</span>
+                            {% elif report.status == 'resolved' %}
+                            <span class="badge bg-success">已处理</span>
+                            {% elif report.status == 'dismissed' %}
+                            <span class="badge bg-secondary">已忽略</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ report.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if report.status == 'pending' %}
+                            <div class="btn-group" role="group">
+                                <form method="POST" action="{{ url_for('advanced.resolve_report', report_id=report.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-success" title="处理举报">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ url_for('advanced.dismiss_report', report_id=report.id) }}" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-secondary" title="忽略举报">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <span class="text-muted">已处理</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 分页 -->
+{% if reports.pages > 1 %}
+<nav aria-label="举报分页" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if reports.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('advanced.admin_reports', page=reports.prev_num) }}">上一页</a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in reports.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != reports.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('advanced.admin_reports', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">…</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if reports.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('advanced.admin_reports', page=reports.next_num) }}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}
+
+</final_file_content>
+
+重要：对于此文件的任何未来更改，请使用上面显示的final_file_content作为参考。此内容反映了文件的当前状态，包括任何自动格式化（例如，如果你使用了单引号但格式化器将其转换为双引号）。始终基于此最终版本进行SEARCH/REPLACE操作以确保准确性。
+
+
+
+<environment_details>
+# VSCode Visible Files
+templates/admin/reports.html
+
+# VSCode Open Tabs
+templates/index.html
+templates/categories.html
+templates/category_detail.html
+templates/create_vote.html
+routes_advanced.py
+templates/post_detail.html
+templates/create_post.html
+static/css/style.css
+static/js/script.js
+models.py
+templates/base.html
+templates/admin/dashboard.html
+templates/admin/users.html
+templates/admin/categories.html
+templates/admin/posts.html
+templates/admin/reports.html
+
+# Current Time
+2025/8/13 下午5:08:36 (Asia/Shanghai, UTC+8:00)
+
+# Context Window Usage
+97,377 / 128K tokens used (76%)
+
+# Current Mode
+ACT MODE
+</environment_details>

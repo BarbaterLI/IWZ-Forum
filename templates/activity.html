@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block title %}互动历史{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">互动历史</h2>
+
+<ul class="nav nav-tabs mb-4" id="activityTab" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="posts-tab" data-bs-toggle="tab" data-bs-target="#posts" type="button" role="tab">我的帖子</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">我的回复</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="likes-tab" data-bs-toggle="tab" data-bs-target="#likes" type="button" role="tab">我的点赞</button>
+    </li>
+</ul>
+
+<div class="tab-content" id="activityTabContent">
+    <!-- 我的帖子 -->
+    <div class="tab-pane fade show active" id="posts" role="tabpanel">
+        {% if user_posts.items %}
+            {% for post in user_posts.items %}
+            <div class="post-card">
+                <h3 class="post-title">
+                    <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
+                    {% if post.is_essence %}
+                    <span class="badge bg-warning text-dark ms-2">精华</span>
+                    {% endif %}
+                </h3>
+                <div class="post-meta">
+                    <i class="fas fa-clock"></i> {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    <i class="fas fa-folder ms-3"></i> {{ post.category.name }}
+                    <i class="fas fa-eye ms-3"></i> {{ post.view_count }} 浏览
+                    <i class="fas fa-comment ms-3"></i> {{ post.comments.count() }} 回复
+                </div>
+                <div class="post-content">
+                    {{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 分页 -->
+            {% if user_posts.pages > 1 %}
+            <nav aria-label="帖子分页">
+                <ul class="pagination justify-content-center">
+                    {% if user_posts.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', page=user_posts.prev_num) }}">上一页</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in user_posts.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != user_posts.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('advanced.interactions', page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if user_posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', page=user_posts.next_num) }}">下一页</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="post-card">
+                <p class="text-center">您还没有发布任何帖子。</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 我的回复 -->
+    <div class="tab-pane fade" id="comments" role="tabpanel">
+        {% if user_comments.items %}
+            {% for comment in user_comments.items %}
+            <div class="post-card">
+                <div class="post-content">
+                    {{ comment.content }}
+                </div>
+                <div class="post-meta">
+                    <i class="fas fa-clock"></i> {{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    发表于: 
+                    <a href="{{ url_for('main.post_detail', post_id=comment.post.id) }}">{{ comment.post.title }}</a>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- 分页 -->
+            {% if user_comments.pages > 1 %}
+            <nav aria-label="回复分页">
+                <ul class="pagination justify-content-center">
+                    {% if user_comments.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', comments_page=user_comments.prev_num) }}">上一页</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in user_comments.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != user_comments.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('advanced.interactions', comments_page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if user_comments.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', comments_page=user_comments.next_num) }}">下一页</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="post-card">
+                <p class="text-center">您还没有发表任何回复。</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 我的点赞 -->
+    <div class="tab-pane fade" id="likes" role="tabpanel">
+        {% if user_likes.items %}
+            {% for like in user_likes.items %}
+            <div class="post-card">
+                {% if like.post %}
+                <h3 class="post-title">
+                    <a href="{{ url_for('main.post_detail', post_id=like.post.id) }}" class="text-decoration-none">{{ like.post.title }}</a>
+                </h3>
+                <div class="post-meta">
+                    <i class="fas fa-user"></i> {{ like.post.author.username }} 
+                    <i class="fas fa-clock ms-3"></i> {{ like.post.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </div>
+                <div class="post-content">
+                    {{ like.post.content[:200] }}{% if like.post.content|length > 200 %}...{% endif %}
+                </div>
+                {% elif like.comment %}
+                <div class="post-content">
+                    {{ like.comment.content }}
+                </div>
+                <div class="post-meta">
+                    <i class="fas fa-user"></i> {{ like.comment.author.username }} 
+                    <i class="fas fa-clock ms-3"></i> {{ like.comment.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    发表于: 
+                    <a href="{{ url_for('main.post_detail', post_id=like.comment.post.id) }}">{{ like.comment.post.title }}</a>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <!-- 分页 -->
+            {% if user_likes.pages > 1 %}
+            <nav aria-label="点赞分页">
+                <ul class="pagination justify-content-center">
+                    {% if user_likes.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', likes_page=user_likes.prev_num) }}">上一页</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for page_num in user_likes.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != user_likes.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('advanced.interactions', likes_page=page_num) }}">{{ page_num }}</a>
+                            </li>
+                            {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                            {% endif %}
+                        {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">…</span>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if user_likes.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('advanced.interactions', likes_page=user_likes.next_num) }}">下一页</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="post-card">
+                <p class="text-center">您还没有点赞任何内容。</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

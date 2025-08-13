@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}{{ post.title }} - 论坛系统{% endblock %}
+
+{% block content %}
+<!-- 帖子内容 -->
+<div class="card shadow-sm">
+    <div class="card-body">
+<div class="d-flex justify-content-between align-items-start mb-3">
+            <h1 class="card-title">{{ post.title }}</h1>
+            {% if post.is_essence %}
+            <span class="badge bg-warning text-dark">精华</span>
+            {% endif %}
+        </div>
+        
+        <div class="d-flex align-items-center mb-3">
+            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+            <div>
+                <a href="{{ url_for('main.user_detail', user_id=post.author.id) }}" class="text-decoration-none fw-bold">{{ post.author.username }}</a>
+                <div class="small text-muted">
+                    <i class="fas fa-clock me-1"></i>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+                    <i class="fas fa-folder ms-2 me-1"></i><a href="{{ url_for('main.category_detail', category_id=post.category.id) }}" class="text-decoration-none">{{ post.category.name }}</a>
+                    <i class="fas fa-eye ms-2 me-1"></i>{{ post.view_count }} 浏览
+                </div>
+            </div>
+        </div>
+        
+    <div class="post-content mt-4">
+        {{ post.get_content_html()|safe }}
+    </div>
+    
+    <!-- 点赞/踩功能 -->
+    {% if current_user.is_authenticated %}
+    <div class="mt-4 pt-3 border-top">
+        <div class="d-flex align-items-center">
+            {% set vote_counts = post.get_vote_count() %}
+            <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=1) }}" class="me-3">
+                <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == 1 %}btn-success{% else %}btn-outline-success{% endif %}">
+                    <i class="fas fa-thumbs-up me-1"></i> 赞 ({{ vote_counts[0] }})
+                </button>
+            </form>
+            <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=-1) }}">
+                <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                    <i class="fas fa-thumbs-down me-1"></i> 踩 ({{ vote_counts[1] }})
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+        
+        <!-- 附件显示 -->
+        {% if post.attachments.count() > 0 %}
+        <div class="mt-4 pt-3 border-top">
+            <h6><i class="fas fa-paperclip me-1"></i>附件 ({{ post.attachments.count() }})</h6>
+            <div class="row g-2">
+                {% for attachment in post.attachments %}
+                <div class="col-md-6">
+                    <div class="attachment-item d-flex align-items-center">
+                        <i class="fas fa-file me-2 text-primary"></i>
+                        <div class="flex-grow-1">
+                            <a href="{{ url_for('main.download_attachment', attachment_id=attachment.id) }}" target="_blank" class="text-decoration-none">{{ attachment.filename }}</a>
+                            <div class="small text-muted">{{ "%.2f"|format(attachment.file_size/1024) }} KB</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+</div>
+
+<!-- 回复列表 -->
+<h3 class="mt-5 mb-4">{{ post.comments.count() }} 条回复</h3>
+{% for comment in post.comments %}
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <div class="d-flex">
+            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-3" width="40" height="40">
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between">
+                    <h6 class="mb-1">
+                        <a href="{{ url_for('main.user_detail', user_id=comment.author.id) }}" class="text-decoration-none">{{ comment.author.username }}</a>
+                    </h6>
+                    <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <div class="mt-2">
+                    {{ comment.get_content_html()|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- 回复表单 -->
+{% if current_user.is_authenticated %}
+<div class="card shadow-sm mt-4">
+    <div class="card-body">
+        <h4 class="card-title">发表回复</h4>
+        <form method="POST" action="{{ url_for('main.add_comment', post_id=post.id) }}">
+            <div class="mb-3">
+                <textarea class="form-control" name="content" rows="4" placeholder="请输入您的回复..." required></textarea>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i>提交回复
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% else %}
+<div class="card shadow-sm mt-4">
+    <div class="card-body text-center">
+        <i class="fas fa-sign-in-alt fa-2x text-muted mb-3"></i>
+        <p class="mb-0">请<a href="{{ url_for('main.login') }}" class="text-decoration-none">登录</a>后发表回复</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

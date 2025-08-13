@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}后台管理 - 仪表板{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">后台管理仪表板</h2>
+    <div>
+        <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-outline-primary">用户管理</a>
+        <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-outline-success">版块管理</a>
+        <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-outline-info">帖子管理</a>
+        <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-outline-warning">举报管理</a>
+        <a href="{{ url_for('advanced.admin_analytics') }}" class="btn btn-outline-secondary">数据统计</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary mb-3">
+            <div class="card-header">用户总数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ user_count }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success mb-3">
+            <div class="card-header">帖子总数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ post_count }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info mb-3">
+            <div class="card-header">回复总数</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ comment_count }}</h5>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-warning mb-3">
+            <div class="card-header">待处理举报</div>
+            <div class="card-body">
+                <h5 class="card-title">{{ report_count }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">最近帖子</h4>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>标题</th>
+                            <th>作者</th>
+                            <th>时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in recent_posts %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-decoration-none">{{ post.title[:30] }}</a>
+                                {% if post.is_essence %}
+                                <span class="badge bg-warning">精华</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ post.author.username }}</td>
+                            <td>{{ post.created_at.strftime('%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h4 class="mb-0">新注册用户</h4>
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>邮箱</th>
+                            <th>注册时间</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                        <tr>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.created_at.strftime('%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h4 class="mb-0">快速操作</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-users me-2"></i>管理用户
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-success w-100">
+                            <i class="fas fa-folder me-2"></i>管理版块
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-info w-100">
+                            <i class="fas fa-file-alt me-2"></i>管理帖子
+                        </a>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-warning w-100">
+                            <i class="fas fa-flag me-2"></i>处理举报
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

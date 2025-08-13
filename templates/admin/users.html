@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}后台管理 - 用户管理{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">用户管理</h2>
+    <a href="{{ url_for('advanced.admin_dashboard') }}" class="btn btn-secondary">
+        <i class="fas fa-arrow-left me-1"></i>返回仪表板
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="mb-0">用户列表</h4>
+            <span class="badge bg-primary">总计 {{ users.total }} 用户</span>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>用户名</th>
+                        <th>邮箱</th>
+                        <th>注册时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users.items %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
+                                <span>{{ user.username }}</span>
+                                {% if user.is_admin %}
+                                <span class="badge bg-danger ms-2">管理员</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if user.is_admin %}
+                            <span class="badge bg-success">管理员</span>
+                            {% else %}
+                            <span class="badge bg-secondary">普通用户</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ url_for('main.user_detail', user_id=user.id) }}" class="btn btn-sm btn-outline-primary" title="查看资料">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{{ url_for('main.profile') }}?user_id={{ user.id }}" class="btn btn-sm btn-outline-info" title="编辑资料">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if not user.is_admin %}
+                                <button type="button" class="btn btn-sm btn-outline-danger" title="删除用户" 
+                                        data-bs-toggle="modal" data-bs-target="#deleteUserModal"
+                                        data-id="{{ user.id }}" data-username="{{ user.username }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- 分页 -->
+{% if users.pages > 1 %}
+<nav aria-label="用户分页" class="mt-4">
+    <ul class="pagination justify-content-center">
+        {% if users.has_prev %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('advanced.admin_users', page=users.prev_num) }}">上一页</a>
+        </li>
+        {% endif %}
+        
+        {% for page_num in users.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != users.page %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('advanced.admin_users', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% else %}
+                <li class="page-item active">
+                    <span class="page-link">{{ page_num }}</span>
+                </li>
+                {% endif %}
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link">…</span>
+            </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if users.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="{{ url_for('advanced.admin_users', page=users.next_num) }}">下一页</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+<!-- 删除确认模态框 -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">确认删除用户</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>您确定要删除用户 <strong id="deleteUserName"></strong> 吗？此操作不可撤销。</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">确认删除</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 删除用户模态框事件
+        const deleteUserModal = document.getElementById('deleteUserModal');
+        deleteUserModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const id = button.getAttribute('data-id');
+            const username = button.getAttribute('data-username');
+            
+            const modal = this;
+            modal.querySelector('#deleteUserName').textContent = username;
+            
+            // 设置确认删除按钮的事件
+            modal.querySelector('#confirmDeleteBtn').onclick = function() {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/admin/user/' + id + '/delete';
+                document.body.appendChild(form);
+                form.submit();
+            };
+        });
+    });
+</script>
+{% endblock %}

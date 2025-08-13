@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}编辑评论{% endblock %}
+
+{% block content %}
+<div class="post-card">
+    <h2 class="mb-4">编辑评论</h2>
+    <form method="POST">
+        <div class="mb-3">
+            <label for="content" class="form-label">评论内容</label>
+            <textarea class="form-control" id="content" name="content" rows="5">{{ comment.content }}</textarea>
+        </div>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <a href="{{ url_for('main.post_detail', post_id=comment.post.id) }}" class="btn btn-secondary">取消</a>
+            <button type="submit" class="btn btn-primary">更新评论</button>
+        </div>
+    </form>
+</div>
+
+<!-- 引入SimpleMDE Markdown编辑器 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+    // 等待DOM加载完成后再初始化编辑器
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化SimpleMDE编辑器
+        var simplemde = new SimpleMDE({
+            element: document.getElementById("content"),
+            spellChecker: false,
+            autosave: {
+                enabled: true,
+                uniqueId: "edit-comment-content-{{ comment.id }}",
+                delay: 1000,
+            },
+            toolbar: [
+                "bold", "italic", "strikethrough", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "|",
+                "preview", "side-by-side", "fullscreen", "|",
+                "guide"
+            ],
+            placeholder: "请输入评论内容，支持Markdown语法...",
+            status: false // 隐藏状态栏以节省空间
+        });
+    });
+</script>
+{% endblock %}
