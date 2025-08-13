@@ -1,44 +1,62 @@
-# Flask论坛系统
+# IWZ-Forum论坛系统
+
+[![License](https://img.shields.io/github/license/BarbaterLI/IWZ-Forum)](LICENSE)
+[![Version](https://img.shields.io/github/v/tag/BarbaterLI/IWZ-Forum?sort=semver)](https://github.com/BarbaterLI/IWZ-Forum/releases)
+[![Release](https://img.shields.io/github/downloads/BarbaterLI/IWZ-Forum/total)](https://github.com/BarbaterLI/IWZ-Forum/releases)
+[![Stars](https://img.shields.io/github/stars/BarbaterLI/IWZ-Forum?style=social)](https://github.com/BarbaterLI/IWZ-Forum)
+[![Forks](https://img.shields.io/github/forks/BarbaterLI/IWZ-Forum?style=social)](https://github.com/BarbaterLI/IWZ-Forum)
+[![Issues](https://img.shields.io/github/issues/BarbaterLI/IWZ-Forum)](https://github.com/BarbaterLI/IWZ-Forum/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/BarbaterLI/IWZ-Forum)](https://github.com/BarbaterLI/IWZ-Forum/commits/main)
 
 一个功能完整的基于Flask和SQLite的论坛系统，具有现代化的用户界面和丰富的功能。
+
+## 版本
+0.0.1 (rc)
 
 ## 功能特性
 
 ### 用户系统
-- 用户注册/登录
-- 个人资料管理
-- 头像设置
-- 密码找回
+- 用户注册/登录认证
+- 个人资料管理（头像、个人简介）
+- 密码找回功能
+- 管理员权限系统
 
 ### 内容管理
-- 帖子发布与编辑
-- 评论与回复
-- 版块分类
+- 帖子发布、编辑、删除
+- 评论与回复系统
+- 版块分类管理
 - 标签系统
 - 精华帖推荐
-- 搜索功能
+- 全文搜索功能
 
 ### 社交功能
-- 好友系统
-- 私信聊天
+- 好友系统（添加/移除好友）
+- 私信聊天功能
 - 关注/粉丝系统
-- 黑名单管理
+- 用户黑名单管理
 - @提醒功能
 - 收藏夹管理
 - 点赞/踩功能
 
 ### 高级功能
 - 投票系统
-- 举报处理
-- 后台管理
-- 数据统计
-- 互动历史
+- 举报处理机制
+- 后台管理面板
+- 数据统计与分析
+- 互动历史记录
+
+## 管理功能
+- 用户管理（查看、删除用户）
+- 版块管理（创建、编辑、删除版块）
+- 帖子管理（查看、删除帖子）
+- 举报处理（处理或忽略举报）
+- 数据统计（用户、帖子、评论增长图表）
 
 ## 技术栈
 
 - **后端**: Flask + SQLite
 - **前端**: Bootstrap 5 + Jinja2模板
-- **样式**: CSS3 + JavaScript
+- **样式**: CSS3 + JavaScript，支持深色/浅色主题切换
 - **图标**: Font Awesome + Bootstrap Icons
 
 ## 安装与运行
@@ -51,7 +69,7 @@
 
 1. 克隆项目到本地：
 ```bash
-git clone <项目地址>
+git clone https://github.com/BarbaterLI/IWZ-Forum.git
 cd flask-forum
 ```
 
@@ -103,35 +121,12 @@ flask-forum/
     └── ...                # 其他模板
 ```
 
-## 主要页面
-
-- 首页 (`/`) - 论坛概览
-- 登录/注册页面 - 用户认证
-- 版块列表 (`/categories`) - 所有讨论区
-- 版块详情 (`/category/<id>`) - 特定版块下的帖子
-- 帖子详情 (`/post/<id>`) - 具体讨论内容
-- 发帖页面 (`/create_post`) - 创建新话题
-- 个人中心 (`/profile`) - 个人信息管理
-- 搜索页面 (`/search`) - 内容搜索
-- 后台管理 (`/admin/*`) - 管理员功能
-
-## 开发说明
-
-### 添加新功能
-1. 在`models.py`中添加数据模型
-2. 在`routes.py`或`routes_advanced.py`中添加路由
-3. 在`templates/`中创建相应模板
-4. 在`static/css/style.css`中添加样式（如需要）
-
-### 自定义样式
-- 主题颜色在`static/css/style.css`的`:root`部分定义
-- 可以通过修改CSS变量来自定义主题色
-- 深色模式支持已内置
 
 ## 许可证
 
-MIT License
+AGPL V3 License
 
 ## 联系方式
 
-如有问题，请提交issue或联系项目维护者。
+本项目随缘更新,并且不修bug,使用出现问题概不负责.
+
