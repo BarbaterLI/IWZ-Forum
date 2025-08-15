@@ -3,77 +3,81 @@
 {% block title %}发起投票 - IWZ-Forum{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-body">
-        <h2 class="card-title mb-4">发起投票</h2>
+<div class="post-card">
+    <h2 class="mb-4"><i class="fas fa-poll me-2"></i>发起投票</h2>
+    
+    <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="mb-3">
+            <label for="title" class="form-label">投票标题</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
         
-        <form method="POST">
-            <div class="mb-3">
-                <label for="title" class="form-label">投票标题</label>
-                <input type="text" class="form-control" id="title" name="title" required>
-            </div>
-            
-            <div class="mb-3">
-                <label for="description" class="form-label">投票描述</label>
-                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-            </div>
-            
-            <div class="mb-3">
-                <label class="form-label">投票选项</label>
-                <div class="option-container">
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">选项1</span>
-                        <input type="text" class="form-control" name="options[]" required aria-label="选项1">
-                    </div>
-                    <div class="input-group mb-2">
-                        <span class="input-group-text">选项2</span>
-                        <input type="text" class="form-control" name="options[]" required aria-label="选项2">
-                    </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">投票描述</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="content" class="form-label">详细内容</label>
+            <textarea class="form-control" id="content" name="content" rows="5"></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label class="form-label">投票选项</label>
+            <div class="option-container">
+                <div class="input-group mb-2">
+                    <span class="input-group-text">选项1</span>
+                    <input type="text" class="form-control" name="options[]" required aria-label="选项1">
                 </div>
-                <button type="button" class="btn btn-outline-secondary btn-sm" id="addOption">添加选项</button>
+                <div class="input-group mb-2">
+                    <span class="input-group-text">选项2</span>
+                    <input type="text" class="form-control" name="options[]" required aria-label="选项2">
+                </div>
             </div>
-            
-            <div class="mb-3">
-                <label for="category_id" class="form-label">版块</label>
-                <select class="form-select" id="category_id" name="category_id" required>
-                    <option value="">请选择版块</option>
-                    {% for category in categories %}
-                    <option value="{{ category.id }}">{{ category.name }}</option>
-                    {% endfor %}
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="addOption">添加选项</button>
+        </div>
+        
+        <div class="mb-3">
+            <label for="category_id" class="form-label">版块</label>
+            <select class="form-select" id="category_id" name="category_id" required>
+                <option value="">请选择版块</option>
+                {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="expire_days" class="form-label">投票有效期</label>
+                <select class="form-select" id="expire_days" name="expire_days">
+                    <option value="1">1天</option>
+                    <option value="3">3天</option>
+                    <option value="7" selected>7天</option>
+                    <option value="15">15天</option>
+                    <option value="30">30天</option>
                 </select>
             </div>
-            
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="expire_days" class="form-label">投票有效期</label>
-                    <select class="form-select" id="expire_days" name="expire_days">
-                        <option value="1">1天</option>
-                        <option value="3">3天</option>
-                        <option value="7" selected>7天</option>
-                        <option value="15">15天</option>
-                        <option value="30">30天</option>
-                    </select>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">投票类型</label>
-                    <div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="vote_type" id="single" value="single" checked>
-                            <label class="form-check-label" for="single">单选</label>
-                        </div>
-                        <div class="form-check form-check-inline">
-                            <input class="form-check-input" type="radio" name="vote_type" id="multiple" value="multiple">
-                            <label class="form-check-label" for="multiple">多选</label>
-                        </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">投票类型</label>
+                <div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="vote_type" id="single" value="single" checked>
+                        <label class="form-check-label" for="single">单选</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="vote_type" id="multiple" value="multiple">
+                        <label class="form-check-label" for="multiple">多选</label>
                     </div>
                 </div>
             </div>
-            
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">发起投票</button>
-            </div>
-        </form>
-    </div>
+        </div>
+        
+        <div class="d-grid">
+            <button type="submit" class="btn btn-primary">发起投票</button>
+        </div>
+    </form>
 </div>
 
 <script>
@@ -91,5 +95,32 @@ document.getElementById('addOption').addEventListener('click', function() {
     
     container.appendChild(newOption);
 });
+</script>
+
+<!-- 引入SimpleMDE Markdown编辑器 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
+<script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>
+<script>
+    // 等待DOM加载完成后再初始化编辑器
+    document.addEventListener('DOMContentLoaded', function() {
+        // 初始化SimpleMDE编辑器
+        var simplemde = new SimpleMDE({
+            element: document.getElementById("content"),
+            spellChecker: false,
+            autosave: {
+                enabled: true,
+                uniqueId: "vote-content",
+                delay: 1000,
+            },
+            toolbar: [
+                "bold", "italic", "strikethrough", "heading", "|",
+                "quote", "unordered-list", "ordered-list", "|",
+                "link", "image", "|",
+                "preview", "side-by-side", "fullscreen", "|",
+                "guide"
+            ],
+            placeholder: "请输入投票的详细内容，支持Markdown语法...",
+        });
+    });
 </script>
 {% endblock %}

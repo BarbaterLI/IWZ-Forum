@@ -3,143 +3,127 @@
 {% block title %}后台管理 - 数据统计{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">数据统计</h2>
-    <a href="{{ url_for('advanced.admin_dashboard') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-1"></i>返回仪表板
-    </a>
+<div class="post-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0"><i class="fas fa-chart-bar me-2"></i>数据统计</h2>
+        <a href="{{ url_for('advanced.admin_dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>返回仪表板
+        </a>
+    </div>
 </div>
 
 <!-- 统计卡片 -->
 <div class="row mb-4">
-    <div class="col-md-3 mb-3">
-        <div class="card text-white bg-primary h-100">
-            <div class="card-header">总用户数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-primary text-white h-100">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ user_stats | sum(attribute='count') }}</h5>
+                <p class="card-text">总用户数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-white bg-success h-100">
-            <div class="card-header">总帖子数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-success text-white h-100">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ post_stats | sum(attribute='count') }}</h5>
+                <p class="card-text">总帖子数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-white bg-info h-100">
-            <div class="card-header">总回复数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-info text-white h-100">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ comment_stats | sum(attribute='count') }}</h5>
+                <p class="card-text">总回复数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3 mb-3">
-        <div class="card text-white bg-warning h-100">
-            <div class="card-header">总版块数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-warning text-white h-100">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ categories | length }}</h5>
+                <p class="card-text">总版块数</p>
             </div>
         </div>
     </div>
 </div>
 
 <!-- 图表区域 -->
-<div class="row mb-4">
-    <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">数据趋势图</h4>
-            </div>
-            <div class="card-body">
-                <canvas id="analyticsChart" height="100"></canvas>
-            </div>
-        </div>
+<div class="post-card mb-4">
+    <h4 class="mb-4"><i class="fas fa-chart-line me-2"></i>数据趋势图</h4>
+    <div class="chart-container" style="position: relative; height:40vh; width:100%">
+        <canvas id="analyticsChart"></canvas>
     </div>
 </div>
 
 <!-- 详细统计表格 -->
 <div class="row">
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">用户增长统计</h4>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>日期</th>
-                                <th>新增用户数</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stat in user_stats %}
-                            <tr>
-                                <td>{{ stat.date }}</td>
-                                <td>{{ stat.count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+    <div class="col-md-4 mb-4">
+        <div class="post-card">
+            <h4 class="mb-4"><i class="fas fa-users me-2"></i>用户增长统计</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>日期</th>
+                            <th>新增用户数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in user_stats %}
+                        <tr>
+                            <td>{{ stat.date }}</td>
+                            <td>{{ stat.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">帖子增长统计</h4>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>日期</th>
-                                <th>新增帖子数</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stat in post_stats %}
-                            <tr>
-                                <td>{{ stat.date }}</td>
-                                <td>{{ stat.count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+    <div class="col-md-4 mb-4">
+        <div class="post-card">
+            <h4 class="mb-4"><i class="fas fa-file-alt me-2"></i>帖子增长统计</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>日期</th>
+                            <th>新增帖子数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in post_stats %}
+                        <tr>
+                            <td>{{ stat.date }}</td>
+                            <td>{{ stat.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">回复增长统计</h4>
-            </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>日期</th>
-                                <th>新增回复数</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stat in comment_stats %}
-                            <tr>
-                                <td>{{ stat.date }}</td>
-                                <td>{{ stat.count }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+    <div class="col-md-4 mb-4">
+        <div class="post-card">
+            <h4 class="mb-4"><i class="fas fa-comments me-2"></i>回复增长统计</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>日期</th>
+                            <th>新增回复数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in comment_stats %}
+                        <tr>
+                            <td>{{ stat.date }}</td>
+                            <td>{{ stat.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -151,9 +135,9 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // 准备图表数据 (使用JSON格式)
-        const userStats = {{ user_stats | tojson }};
-        const postStats = {{ post_stats | tojson }};
-        const commentStats = {{ comment_stats | tojson }};
+        const userStats = JSON.parse('{{ user_stats | tojson | safe }}');
+        const postStats = JSON.parse('{{ post_stats | tojson | safe }}');
+        const commentStats = JSON.parse('{{ comment_stats | tojson | safe }}');
         
         // 提取所有唯一的日期
         const allDates = [...new Set([...userStats.map(s => s.date), ...postStats.map(s => s.date), ...commentStats.map(s => s.date)])];
@@ -200,9 +184,10 @@
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'top',
+                        position: 'top'
                     },
                     title: {
                         display: true,

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from extensions import db
-from models import User, Category, Post, Comment, Tag, Message, Report, Vote
+from models import User, Category, Post, Comment, Tag, Message, Report, Vote, RequestLog
 from datetime import datetime, timedelta
 import os
 
@@ -68,22 +68,34 @@ def search():
     query = request.args.get('q', '')
     page = request.args.get('page', 1, type=int)
     
+    users = []
+    posts = []
+    
     if query:
-        # 搜索帖子标题和内容
+        # 搜索帖子标题、内容、ID
         posts = Post.query.filter(
             db.or_(
                 Post.title.contains(query),
-                Post.content.contains(query)
+                Post.content.contains(query),
+                Post.id.contains(query)  # 搜索帖子ID
             )
         ).order_by(Post.created_at.desc()).paginate(
             page=page, per_page=10, error_out=False
         )
+        
+        # 搜索用户名称和用户ID
+        users = User.query.filter(
+            db.or_(
+                User.username.contains(query),
+                User.user_id.contains(query)  # 搜索用户ID
+            )
+        ).all()
     else:
         posts = Post.query.order_by(Post.created_at.desc()).paginate(
             page=page, per_page=10, error_out=False
         )
     
-    return render_template('search.html', posts=posts, query=query)
+    return render_template('search.html', posts=posts, users=users, query=query)
 
 # 后台管理页面 - 仪表板
 @bp.route('/admin')
@@ -112,6 +124,29 @@ def admin_dashboard():
                           report_count=report_count,
                           recent_posts=recent_posts,
                           recent_users=recent_users)
+
+# 后台管理页面 - 请求日志
+@bp.route('/admin/logs')
+@login_required
+def admin_logs():
+    if not current_user.is_admin:
+        flash('您没有权限访问此页面')
+        return redirect(url_for('main.index'))
+    
+    # 获取过滤参数
+    days = request.args.get('days', 7, type=int)
+    page = request.args.get('page', 1, type=int)
+    
+    # 计算日期范围
+    from datetime import datetime, timedelta
+    start_date = datetime.utcnow() - timedelta(days=days)
+    
+    # 查询日志
+    logs = RequestLog.query.filter(RequestLog.timestamp >= start_date).order_by(
+        RequestLog.timestamp.desc()
+    ).paginate(page=page, per_page=20, error_out=False)
+    
+    return render_template('admin/logs.html', logs=logs)
 
 # 后台管理页面 - 用户管理
 @bp.route('/admin/users')
@@ -447,7 +482,17 @@ def messages():
     
     users = User.query.filter(User.id.in_(user_ids)).all()
     
-    return render_template('messages.html', users=users)
+    # 添加获取最后消息的函数
+    def get_last_message(user1_id, user2_id):
+        last_message = Message.query.filter(
+            db.or_(
+                db.and_(Message.sender_id == user1_id, Message.recipient_id == user2_id),
+                db.and_(Message.sender_id == user2_id, Message.recipient_id == user1_id)
+            )
+        ).order_by(Message.created_at.desc()).first()
+        return last_message
+    
+    return render_template('messages.html', users=users, get_last_message=get_last_message)
 
 # 私信聊天详情页面
 @bp.route('/messages/<int:user_id>')
@@ -569,7 +614,7 @@ def unblock(user_id):
     return redirect(url_for('advanced.blacklist'))
 
 # 点赞/踩功能
-@bp.route('/vote/<string:entity_type>/<entity_id>/<int:vote_type>')
+@bp.route('/vote/<string:entity_type>/<entity_id>/<int:vote_type>', methods=['POST'])
 @login_required
 def vote(entity_type, entity_id, vote_type):
     # 验证投票类型

@@ -3,60 +3,96 @@
 {% block title %}后台管理 - 仪表板{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">后台管理仪表板</h2>
-    <div>
-        <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-outline-primary">用户管理</a>
-        <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-outline-success">版块管理</a>
-        <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-outline-info">帖子管理</a>
-        <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-outline-warning">举报管理</a>
-        <a href="{{ url_for('advanced.admin_analytics') }}" class="btn btn-outline-secondary">数据统计</a>
+<div class="post-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>后台管理仪表板</h2>
+        <div>
+            <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-outline-primary">用户管理</a>
+            <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-outline-success">版块管理</a>
+            <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-outline-info">帖子管理</a>
+            <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-outline-warning">举报管理</a>
+            <a href="{{ url_for('advanced.admin_analytics') }}" class="btn btn-outline-secondary">数据统计</a>
+        </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary mb-3">
-            <div class="card-header">用户总数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-primary text-white">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ user_count }}</h5>
+                <p class="card-text">用户总数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success mb-3">
-            <div class="card-header">帖子总数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-success text-white">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ post_count }}</h5>
+                <p class="card-text">帖子总数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info mb-3">
-            <div class="card-header">回复总数</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-warning text-white">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ comment_count }}</h5>
+                <p class="card-text">回复总数</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning mb-3">
-            <div class="card-header">待处理举报</div>
-            <div class="card-body">
+    <div class="col-md-3 mb-4">
+        <div class="post-card bg-danger text-white">
+            <div class="card-body text-center">
                 <h5 class="card-title">{{ report_count }}</h5>
+                <p class="card-text">待处理举报</p>
             </div>
+        </div>
+    </div>
+</div>
+
+<div class="post-card mb-4">
+    <h4 class="mb-4"><i class="fas fa-cogs me-2"></i>管理功能</h4>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-outline-primary w-100">
+                <i class="fas fa-users"></i> 用户管理
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-outline-success w-100">
+                <i class="fas fa-folder"></i> 版块管理
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-outline-info w-100">
+                <i class="fas fa-file-alt"></i> 帖子管理
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-outline-warning w-100">
+                <i class="fas fa-flag"></i> 举报处理
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_analytics') }}" class="btn btn-outline-secondary w-100">
+                <i class="fas fa-chart-bar"></i> 数据统计
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_logs') }}" class="btn btn-outline-dark w-100">
+                <i class="fas fa-clipboard-list"></i> 请求日志
+            </a>
         </div>
     </div>
 </div>
 
 <div class="row">
     <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header">
-                <h4 class="mb-0">最近帖子</h4>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-hover mb-0">
+        <div class="post-card mb-4">
+            <h4 class="mb-4"><i class="fas fa-file-alt me-2"></i>最近帖子</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>标题</th>
@@ -83,12 +119,10 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header">
-                <h4 class="mb-0">新注册用户</h4>
-            </div>
-            <div class="card-body p-0">
-                <table class="table table-hover mb-0">
+        <div class="post-card mb-4">
+            <h4 class="mb-4"><i class="fas fa-users me-2"></i>新注册用户</h4>
+            <div class="table-responsive">
+                <table class="table table-hover">
                     <thead>
                         <tr>
                             <th>用户名</th>
@@ -111,36 +145,28 @@
     </div>
 </div>
 
-<div class="row">
-    <div class="col-md-12">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h4 class="mb-0">快速操作</h4>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-primary w-100">
-                            <i class="fas fa-users me-2"></i>管理用户
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-success w-100">
-                            <i class="fas fa-folder me-2"></i>管理版块
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-info w-100">
-                            <i class="fas fa-file-alt me-2"></i>管理帖子
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-warning w-100">
-                            <i class="fas fa-flag me-2"></i>处理举报
-                        </a>
-                    </div>
-                </div>
-            </div>
+<div class="post-card">
+    <h4 class="mb-4"><i class="fas fa-bolt me-2"></i>快速操作</h4>
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_users') }}" class="btn btn-primary w-100">
+                <i class="fas fa-users me-2"></i>管理用户
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_categories') }}" class="btn btn-success w-100">
+                <i class="fas fa-folder me-2"></i>管理版块
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_posts') }}" class="btn btn-info w-100">
+                <i class="fas fa-file-alt me-2"></i>管理帖子
+            </a>
+        </div>
+        <div class="col-md-3 mb-3">
+            <a href="{{ url_for('advanced.admin_reports') }}" class="btn btn-warning w-100">
+                <i class="fas fa-flag me-2"></i>处理举报
+            </a>
         </div>
     </div>
 </div>

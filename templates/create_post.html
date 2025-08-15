@@ -3,38 +3,46 @@
 {% block title %}发表新帖 - IWZ-Forum{% endblock %}
 
 {% block content %}
-<div class="post-card">
-    <h2 class="mb-4">发表新帖</h2>
-    <form method="POST" enctype="multipart/form-data">
-        <div class="mb-3">
-            <label for="title" class="form-label">标题</label>
-            <input type="text" class="form-control" id="title" name="title" required>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="post-card">
+            <h2 class="mb-4">发表新帖</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-3">
+                    <label for="title" class="form-label">标题</label>
+                    <input type="text" class="form-control" id="title" name="title" required placeholder="请输入帖子标题">
+                </div>
+                <div class="mb-3">
+                    <label for="category_id" class="form-label">版块</label>
+                    <select class="form-select" id="category_id" name="category_id" required>
+                        <option value="">请选择版块</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="content" class="form-label">内容</label>
+                    <textarea class="form-control" id="content" name="content" rows="15" placeholder="请输入帖子内容，支持Markdown语法..."></textarea>
+                    <div class="form-text">支持Markdown语法和HTML标签</div>
+                </div>
+                <div class="mb-3">
+                    <label for="file" class="form-label">附件上传</label>
+                    <input type="file" class="form-control" id="file" name="file" accept=".md,.txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip,.rar">
+                    <div class="form-text">支持Markdown文件(.md)和其他常见格式，文件大小不超过10MB</div>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('main.index') }}" class="btn btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-primary">发表帖子</button>
+                </div>
+            </form>
         </div>
-        <div class="mb-3">
-            <label for="category_id" class="form-label">版块</label>
-            <select class="form-select" id="category_id" name="category_id" required>
-                <option value="">请选择版块</option>
-                {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="mb-3">
-            <label for="content" class="form-label">内容</label>
-            <textarea class="form-control" id="content" name="content" rows="10"></textarea>
-            <div class="form-text">支持Markdown语法和HTML标签</div>
-        </div>
-        <div class="mb-3">
-            <label for="file" class="form-label">附件上传</label>
-            <input type="file" class="form-control" id="file" name="file" accept=".md,.txt,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.gif,.zip,.rar">
-            <div class="form-text">支持Markdown文件(.md)和其他常见格式，文件大小不超过10MB</div>
-        </div>
-        <div class="d-grid">
-            <button type="submit" class="btn btn-primary">发表帖子</button>
-        </div>
-    </form>
+    </div>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <!-- 引入SimpleMDE Markdown编辑器 -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.css">
 <script src="https://cdn.jsdelivr.net/simplemde/latest/simplemde.min.js"></script>

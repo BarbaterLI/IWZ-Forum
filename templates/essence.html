@@ -3,11 +3,13 @@
 {% block title %}精华帖{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">精华帖</h2>
+<div class="post-card mb-4">
+    <h2 class="mb-0"><i class="fas fa-star me-2 text-warning"></i>精华帖</h2>
+</div>
 
 {% if posts %}
     {% for post in posts %}
-    <div class="post-card">
+    <div class="post-card mb-3">
         <h3 class="post-title">
             <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
             <span class="badge bg-warning text-dark ms-2">精华</span>
@@ -27,13 +29,13 @@
         </div>
         {% endif %}
         <div class="post-content">
-            {{ post.content[:200] | striptags }}{% if post.content | striptags | length > 200 %}...{% endif %}
+            {{ post.get_content_preview(200) }}
         </div>
     </div>
     {% endfor %}
 {% else %}
-    <div class="post-card">
-        <p class="text-center">暂无精华帖。</p>
+    <div class="post-card text-center">
+        <p class="mb-0">暂无精华帖。</p>
     </div>
 {% endif %}
 {% endblock %}

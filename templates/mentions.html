@@ -3,13 +3,19 @@
 {% block title %}@提醒{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">@提醒</h2>
+<div class="post-card mb-4">
+    <h2 class="mb-0"><i class="fas fa-at me-2"></i>@提醒</h2>
+</div>
 
 {% if comments %}
     {% for comment in comments %}
     <div class="post-card">
         <div class="d-flex align-items-center mb-3">
-            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="user-avatar-sm">
+            {% if comment.author.avatar and comment.author.avatar != 'default.jpg' %}
+                <img src="{{ url_for('static', filename='uploads/' + comment.author.avatar) }}" alt="{{ comment.author.username }}" class="user-avatar-sm">
+            {% else %}
+                <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ comment.author.username }}" class="user-avatar-sm">
+            {% endif %}
             <div class="ms-3">
                 <strong>{{ comment.author.username }}</strong>
                 <span class="text-muted ms-2">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -29,8 +35,8 @@
     </div>
     {% endfor %}
 {% else %}
-    <div class="post-card">
-        <p class="text-center">暂无@提醒。</p>
+    <div class="post-card text-center">
+        <p class="mb-0">暂无@提醒。</p>
     </div>
 {% endif %}
 {% endblock %}

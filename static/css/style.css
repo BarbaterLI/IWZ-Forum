@@ -140,8 +140,8 @@ header {
     border-radius: 18px;
     box-shadow: 0 8px 32px rgba(67, 97, 238, 0.13), 0 0 0 4px rgba(67,97,238,0.08);
     border: 2px solid transparent;
-    background-clip: padding-box, border-box;
     -webkit-background-clip: padding-box, border-box;
+    background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
     background-image: var(--header-gradient), linear-gradient(90deg, #4361ee 0%, #3a56e4 100%);
     margin-bottom: 32px;
@@ -269,6 +269,7 @@ h1 {
     text-align: center;
     box-shadow: 0 4px 24px rgba(67, 97, 238, 0.10), 0 0 0 4px rgba(67,97,238,0.07);
     border: 2px solid transparent;
+    -webkit-background-clip: padding-box, border-box;
     background-clip: padding-box, border-box;
     background-origin: padding-box, border-box;
     background-image: var(--card-bg), linear-gradient(120deg, #4361ee 0%, #3a56e4 100%);
@@ -318,6 +319,7 @@ h1 {
     margin-bottom: 22px;
     color: var(--primary-color);
     background: linear-gradient(135deg, #4361ee 60%, #3a56e4 100%);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     text-shadow: 0 2px 8px rgba(67, 97, 238, 0.10);
@@ -563,11 +565,11 @@ footer {
 }
 
 .user-avatar {
-    width: 50px;
-    height: 50px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 15px;
+    border: 3px solid #dee2e6;
 }
 
 .form-control, .form-select {
@@ -618,6 +620,14 @@ footer {
 
 .dark-mode .bg-secondary-light {
     background-color: #2d2d2d;
+}
+
+/* 用户头像小尺寸 */
+.user-avatar-sm {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 /* 标签云样式 */
@@ -699,4 +709,104 @@ footer {
 /* 投票进度条样式 */
 .poll-progress {
     height: 10px !important;
+}
+
+/* 统计数字样式 */
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+/* 成就系统样式 */
+.achievement-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.achievement-name {
+    font-weight: 600;
+    margin: 0.5rem 0 0.25rem 0;
+}
+
+.achievement-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* 个人资料页面样式 */
+.nav-tabs .nav-link {
+    color: var(--text-color);
+    border: 1px solid transparent;
+    border-bottom: 3px solid transparent;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--primary-color);
+    border-bottom: 3px solid var(--primary-color);
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+    border-color: transparent;
+    background-color: rgba(67, 97, 238, 0.1);
+}
+
+/* 帖子预览样式 */
+.post-preview {
+    max-height: 100px;
+    overflow: hidden;
+    position: relative;
+}
+
+.post-preview::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(to bottom, transparent, var(--card-bg));
+}
+
+/* 论坛卡片样式 */
+.post-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    box-shadow: var(--hover-shadow);
+    transform: translateY(-2px);
+}
+
+.post-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.post-meta {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 15px;
+}
+
+.post-content {
+    line-height: 1.6;
+    color: var(--text-color);
 }

@@ -3,11 +3,13 @@
 {% block title %}互动历史{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="mb-0">互动历史</h2>
-    <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left me-1"></i>返回个人中心
-    </a>
+<div class="post-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0"><i class="fas fa-history me-2"></i>互动历史</h2>
+        <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>返回个人中心
+        </a>
+    </div>
 </div>
 
 <!-- 导航标签页 -->
@@ -27,7 +29,7 @@
         <div class="row">
             {% for comment in comments %}
             <div class="col-12 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="post-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h6 class="card-subtitle text-muted">
@@ -48,9 +50,9 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-5">
+        <div class="post-card text-center py-5">
             <i class="fas fa-comment-slash fa-3x text-muted mb-3"></i>
-            <p class="text-muted">您还没有发表过评论</p>
+            <p class="text-muted mb-0">您还没有发表过评论</p>
         </div>
         {% endif %}
     </div>
@@ -61,7 +63,7 @@
         <div class="row">
             {% for vote in votes %}
             <div class="col-12 mb-3">
-                <div class="card shadow-sm h-100">
+                <div class="post-card h-100">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-start mb-2">
                             <h6 class="card-subtitle text-muted">
@@ -99,9 +101,9 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="text-center py-5">
+        <div class="post-card text-center py-5">
             <i class="fas fa-vote-yea fa-3x text-muted mb-3"></i>
-            <p class="text-muted">您还没有进行过投票</p>
+            <p class="text-muted mb-0">您还没有进行过投票</p>
         </div>
         {% endif %}
     </div>

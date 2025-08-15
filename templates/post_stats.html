@@ -3,9 +3,11 @@
 {% block title %}发帖统计{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">发帖统计</h2>
+<div class="post-card mb-4">
+    <h2 class="mb-0"><i class="fas fa-chart-pie me-2"></i>发帖统计</h2>
+</div>
 
-<div class="row">
+<div class="row mb-4">
     <div class="col-md-4">
         <div class="post-card text-center">
             <h4>总发帖数</h4>
@@ -14,11 +16,11 @@
     </div>
 </div>
 
-<div class="post-card">
-    <h4 class="mb-4">版块统计</h4>
+<div class="post-card mb-4">
+    <h4 class="mb-4"><i class="fas fa-folder me-2"></i>版块统计</h4>
     <div class="table-responsive">
         <table class="table table-striped">
-            <thead>
+            <thead class="table-light">
                 <tr>
                     <th>版块名称</th>
                     <th>帖子数</th>
@@ -37,10 +39,10 @@
 </div>
 
 <div class="post-card">
-    <h4 class="mb-4">最近30天发帖统计</h4>
+    <h4 class="mb-4"><i class="fas fa-calendar me-2"></i>最近30天发帖统计</h4>
     <div class="table-responsive">
         <table class="table table-striped">
-            <thead>
+            <thead class="table-light">
                 <tr>
                     <th>日期</th>
                     <th>发帖数</th>

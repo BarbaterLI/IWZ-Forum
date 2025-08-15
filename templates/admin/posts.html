@@ -158,6 +158,14 @@
                 const form = document.createElement('form');
                 form.method = 'POST';
                 form.action = '/admin/post/' + id + '/delete';
+                
+                // 添加CSRF令牌
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = 'csrf_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                form.appendChild(csrfToken);
+                
                 document.body.appendChild(form);
                 form.submit();
             };

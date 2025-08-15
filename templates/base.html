@@ -13,11 +13,13 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% block extra_css %}{% endblock %}
+    <!-- CSRF保护 -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 <body>
     <div class="container-fluid px-0">
         <!-- 顶部导航栏 -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm sticky-top">
             <div class="container">
                 <a class="navbar-brand fw-bold" href="{{ url_for('main.index') }}">
                     <i class="fas fa-comments me-2"></i>IWZ-Forum
@@ -54,8 +56,13 @@
                     <ul class="navbar-nav">
                         {% if current_user.is_authenticated %}
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-user-circle"></i> {{ current_user.username }}
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                {% if current_user.avatar and current_user.avatar != 'default.jpg' %}
+                                    <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" alt="{{ current_user.username }}" class="user-avatar-sm me-2">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ current_user.username }}" class="user-avatar-sm me-2">
+                                {% endif %}
+                                {{ current_user.username }}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
                                 <li><a class="dropdown-item" href="{{ url_for('main.profile') }}">个人中心</a></li>

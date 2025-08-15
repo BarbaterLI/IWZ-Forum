@@ -51,6 +51,7 @@ comment_votes = db.Table('comment_votes',
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.String(36), unique=True, nullable=False, default=lambda: f"iwz-f-u-{uuid.uuid4()}")
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(120), nullable=False)
@@ -176,6 +177,26 @@ class User(UserMixin, db.Model):
         vote = db.session.query(post_votes).filter_by(user_id=self.id, post_id=post.id).first()
         return vote.vote_type if vote else 0
         
+    def get_comment_vote(self, comment):
+        vote = db.session.query(comment_votes).filter_by(user_id=self.id, comment_id=comment.id).first()
+        return vote.vote_type if vote else 0
+        
+    def get_upvotes_received(self):
+        """获取用户收到的点赞数"""
+        # 计算用户帖子收到的点赞数
+        post_upvotes = db.session.query(db.func.sum(post_votes.c.vote_type)).filter(
+            post_votes.c.post_id.in_(db.session.query(Post.id).filter(Post.user_id == self.id)),
+            post_votes.c.vote_type == 1
+        ).scalar() or 0
+        
+        # 计算用户评论收到的点赞数
+        comment_upvotes = db.session.query(db.func.sum(comment_votes.c.vote_type)).filter(
+            comment_votes.c.comment_id.in_(db.session.query(Comment.id).filter(Comment.user_id == self.id)),
+            comment_votes.c.vote_type == 1
+        ).scalar() or 0
+        
+        return post_upvotes + comment_upvotes
+        
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -237,6 +258,20 @@ class Post(db.Model):
         # 确保代码块被正确包装以便复制功能工作
         return html
         
+    def get_content_preview(self, length=100):
+        # 获取内容预览，去除HTML标签并截取指定长度
+        import re
+        # 先转换Markdown为HTML，然后去除HTML标签
+        html_content = self.get_content_html()
+        # 去除HTML标签
+        clean_content = re.sub('<[^<]+?>', '', html_content)
+        # 去除多余空白字符
+        clean_content = re.sub(r'\s+', ' ', clean_content).strip()
+        # 截取指定长度
+        if len(clean_content) > length:
+            return clean_content[:length] + '...'
+        return clean_content
+        
     def __repr__(self):
         return f'<Post {self.title}>'
 
@@ -248,7 +283,7 @@ class Comment(db.Model):
     
     # 外键
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    post_id = db.Column(db.String(36), db.ForeignKey('post.id'), nullable=False)
     
     def get_vote_count(self):
         # 计算赞/踩数量
@@ -261,6 +296,20 @@ class Comment(db.Model):
         # 将Markdown内容转换为HTML
         md = markdown.Markdown(extensions=['fenced_code', 'tables'])
         return md.convert(self.content)
+    
+    def get_content_preview(self, length=100):
+        # 获取内容预览，去除HTML标签并截取指定长度
+        import re
+        # 先转换Markdown为HTML，然后去除HTML标签
+        html_content = self.get_content_html()
+        # 去除HTML标签
+        clean_content = re.sub('<[^<]+?>', '', html_content)
+        # 去除多余空白字符
+        clean_content = re.sub(r'\s+', ' ', clean_content).strip()
+        # 截取指定长度
+        if len(clean_content) > length:
+            return clean_content[:length] + '...'
+        return clean_content
     
     def __repr__(self):
         return f'<Comment {self.id}>'
@@ -318,7 +367,7 @@ class Attachment(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # 外键
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
+    post_id = db.Column(db.String(36), db.ForeignKey('post.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
     # 关系
@@ -326,3 +375,22 @@ class Attachment(db.Model):
     
     def __repr__(self):
         return f'<Attachment {self.filename}>'
+
+class RequestLog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ip_address = db.Column(db.String(45), nullable=False)      # 支持IPv6
+    user_agent = db.Column(db.Text)                            # 用户代理
+    method = db.Column(db.String(10), nullable=False)          # HTTP方法
+    url = db.Column(db.Text, nullable=False)                   # 请求URL
+    status_code = db.Column(db.Integer, nullable=False)        # 响应状态码
+    response_time = db.Column(db.Float)                        # 响应时间(毫秒)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow) # 请求时间
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))  # 用户ID(如果已登录)
+    referrer = db.Column(db.Text)                              # 引荐页面
+    content_length = db.Column(db.Integer)                     # 请求内容长度
+    
+    # 关系
+    user = db.relationship('User', backref='request_logs')
+    
+    def __repr__(self):
+        return f'<RequestLog {self.ip_address} {self.method} {self.url}>'

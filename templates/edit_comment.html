@@ -4,8 +4,9 @@
 
 {% block content %}
 <div class="post-card">
-    <h2 class="mb-4">编辑评论</h2>
+    <h2 class="mb-4"><i class="fas fa-edit me-2"></i>编辑评论</h2>
     <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
             <label for="content" class="form-label">评论内容</label>
             <textarea class="form-control" id="content" name="content" rows="5">{{ comment.content }}</textarea>

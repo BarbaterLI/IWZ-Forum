@@ -72,4 +72,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 页面加载完成后添加复制按钮
     addCopyButtons();
+    
+    // 为所有POST表单自动添加CSRF令牌
+    const forms = document.querySelectorAll('form[method="POST"]');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    
+    if (csrfToken) {
+        forms.forEach(function(form) {
+            // 检查是否已经存在CSRF令牌字段
+            const existingToken = form.querySelector('input[name="csrf_token"]');
+            if (!existingToken) {
+                const tokenInput = document.createElement('input');
+                tokenInput.type = 'hidden';
+                tokenInput.name = 'csrf_token';
+                tokenInput.value = csrfToken.content;
+                form.appendChild(tokenInput);
+            }
+        });
+    }
 });

@@ -3,118 +3,262 @@
 {% block title %}{{ post.title }} - 论坛系统{% endblock %}
 
 {% block content %}
-<!-- 帖子内容 -->
-<div class="card shadow-sm">
-    <div class="card-body">
-<div class="d-flex justify-content-between align-items-start mb-3">
-            <h1 class="card-title">{{ post.title }}</h1>
-            {% if post.is_essence %}
-            <span class="badge bg-warning text-dark">精华</span>
+<div class="row">
+    <div class="col-lg-8">
+        <!-- 帖子内容 -->
+        <div class="post-card mb-4">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <h1 class="post-title">{{ post.title }}</h1>
+                {% if post.is_essence %}
+                <span class="badge bg-warning text-dark">精华</span>
+                {% endif %}
+            </div>
+            
+            <div class="d-flex align-items-center mb-3">
+                {% if post.author.avatar and post.author.avatar != 'default.jpg' %}
+                    <img src="{{ url_for('static', filename='uploads/' + post.author.avatar) }}" alt="{{ post.author.username }}" class="user-avatar-sm me-2">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ post.author.username }}" class="user-avatar-sm me-2">
+                {% endif %}
+                <div>
+                    <a href="{{ url_for('main.user_detail', user_id=post.author.id) }}" class="text-decoration-none fw-bold">{{ post.author.username }}</a>
+                    <div class="small text-muted">
+                        <i class="fas fa-clock me-1"></i>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        <i class="fas fa-folder ms-2 me-1"></i><a href="{{ url_for('main.category_detail', category_id=post.category.id) }}" class="text-decoration-none">{{ post.category.name }}</a>
+                        <i class="fas fa-eye ms-2 me-1"></i>{{ post.view_count }} 浏览
+                    </div>
+                </div>
+            </div>
+            
+            <div class="post-content mt-4">
+                {{ post.get_content_html()|safe }}
+            </div>
+            
+            <!-- 点赞/踩功能 -->
+            {% if current_user.is_authenticated %}
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex align-items-center">
+                    {% set vote_counts = post.get_vote_count() %}
+                    <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=1) }}" class="me-3">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == 1 %}btn-success{% else %}btn-outline-success{% endif %}">
+                            <i class="fas fa-thumbs-up me-1"></i> 赞 ({{ vote_counts[0] }})
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=-1) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                            <i class="fas fa-thumbs-down me-1"></i> 踩 ({{ vote_counts[1] }})
+                        </button>
+                    </form>
+                    <!-- 举报按钮 -->
+                    <button type="button" class="btn btn-sm btn-outline-warning ms-3" data-bs-toggle="modal" data-bs-target="#reportModal" data-type="post" data-id="{{ post.id }}">
+                        <i class="fas fa-flag me-1"></i> 举报
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- 附件显示 -->
+            {% if post.attachments.count() > 0 %}
+            <div class="mt-4 pt-3 border-top">
+                <h6><i class="fas fa-paperclip me-1"></i>附件 ({{ post.attachments.count() }})</h6>
+                <div class="row g-2">
+                    {% for attachment in post.attachments %}
+                    <div class="col-md-6">
+                        <div class="attachment-item d-flex align-items-center">
+                            <i class="fas fa-file me-2 text-primary"></i>
+                            <div class="flex-grow-1">
+                                <a href="{{ url_for('main.download_attachment', attachment_id=attachment.id) }}" target="_blank" class="text-decoration-none">{{ attachment.filename }}</a>
+                                <div class="small text-muted">{{ "%.2f"|format(attachment.file_size/1024) }} KB</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
             {% endif %}
         </div>
-        
-        <div class="d-flex align-items-center mb-3">
-            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-2" width="32" height="32">
-            <div>
-                <a href="{{ url_for('main.user_detail', user_id=post.author.id) }}" class="text-decoration-none fw-bold">{{ post.author.username }}</a>
-                <div class="small text-muted">
-                    <i class="fas fa-clock me-1"></i>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
-                    <i class="fas fa-folder ms-2 me-1"></i><a href="{{ url_for('main.category_detail', category_id=post.category.id) }}" class="text-decoration-none">{{ post.category.name }}</a>
-                    <i class="fas fa-eye ms-2 me-1"></i>{{ post.view_count }} 浏览
+
+        <!-- 回复列表 -->
+        <h3 class="mt-5 mb-4">{{ post.comments.count() }} 条回复</h3>
+        {% for comment in post.comments %}
+        <div class="post-card mb-3">
+            <div class="d-flex">
+                {% if comment.author.avatar and comment.author.avatar != 'default.jpg' %}
+                    <img src="{{ url_for('static', filename='uploads/' + comment.author.avatar) }}" alt="{{ comment.author.username }}" class="user-avatar-sm me-3">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="{{ comment.author.username }}" class="user-avatar-sm me-3">
+                {% endif %}
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="mb-1">
+                            <a href="{{ url_for('main.user_detail', user_id=comment.author.id) }}" class="text-decoration-none">{{ comment.author.username }}</a>
+                        </h6>
+                        <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <div class="mt-2">
+                        {{ comment.get_content_html()|safe }}
+                    </div>
+                    <!-- 评论操作 -->
+                    {% if current_user.is_authenticated %}
+                    <div class="mt-2">
+                        <div class="d-flex align-items-center">
+                            {% set comment_vote_counts = comment.get_vote_count() %}
+                            <form method="POST" action="{{ url_for('advanced.vote', entity_type='comment', entity_id=comment.id, vote_type=1) }}" class="me-2">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-sm {% if current_user.get_comment_vote(comment) == 1 %}btn-success{% else %}btn-outline-success{% endif %}">
+                                    <i class="fas fa-thumbs-up me-1"></i> {{ comment_vote_counts[0] }}
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('advanced.vote', entity_type='comment', entity_id=comment.id, vote_type=-1) }}" class="me-3">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                                <button type="submit" class="btn btn-sm {% if current_user.get_comment_vote(comment) == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                    <i class="fas fa-thumbs-down me-1"></i> {{ comment_vote_counts[1] }}
+                                </button>
+                            </form>
+                            <!-- 评论举报按钮 -->
+                            <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#reportModal" data-type="comment" data-id="{{ comment.id }}">
+                                <i class="fas fa-flag me-1"></i> 举报
+                            </button>
+                            <!-- 编辑评论按钮 -->
+                            {% if current_user.id == comment.author.id or current_user.is_admin %}
+                            <a href="{{ url_for('advanced.edit_comment', comment_id=comment.id) }}" class="btn btn-sm btn-outline-primary ms-2">
+                                <i class="fas fa-edit me-1"></i> 编辑
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
-        
-    <div class="post-content mt-4">
-        {{ post.get_content_html()|safe }}
-    </div>
-    
-    <!-- 点赞/踩功能 -->
-    {% if current_user.is_authenticated %}
-    <div class="mt-4 pt-3 border-top">
-        <div class="d-flex align-items-center">
-            {% set vote_counts = post.get_vote_count() %}
-            <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=1) }}" class="me-3">
-                <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == 1 %}btn-success{% else %}btn-outline-success{% endif %}">
-                    <i class="fas fa-thumbs-up me-1"></i> 赞 ({{ vote_counts[0] }})
-                </button>
-            </form>
-            <form method="POST" action="{{ url_for('advanced.vote', entity_type='post', entity_id=post.id, vote_type=-1) }}">
-                <button type="submit" class="btn btn-sm {% if current_user.get_post_vote(post) == -1 %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                    <i class="fas fa-thumbs-down me-1"></i> 踩 ({{ vote_counts[1] }})
-                </button>
+        {% endfor %}
+
+        <!-- 回复表单 -->
+        {% if current_user.is_authenticated %}
+        <div class="post-card mt-4">
+            <h4 class="mb-3">发表回复</h4>
+            <form method="POST" action="{{ url_for('main.add_comment', post_id=post.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-3">
+                    <textarea class="form-control" name="content" rows="4" placeholder="请输入您的回复..." required></textarea>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane me-1"></i>提交回复
+                    </button>
+                </div>
             </form>
         </div>
+        {% else %}
+        <div class="post-card mt-4 text-center">
+            <i class="fas fa-sign-in-alt fa-2x text-muted mb-3"></i>
+            <p class="mb-0">请<a href="{{ url_for('main.login') }}" class="text-decoration-none">登录</a>后发表回复</p>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
+    
+    <div class="col-lg-4">
+        <!-- 帖子信息 -->
+        <div class="post-card mb-4">
+            <h4 class="mb-3"><i class="fas fa-info-circle me-2 text-info"></i>帖子信息</h4>
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    回复数
+                    <span class="badge bg-primary rounded-pill">{{ post.comments.count() }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    浏览数
+                    <span class="badge bg-secondary rounded-pill">{{ post.view_count }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    发布时间
+                    <span>{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </li>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    最后更新
+                    <span>{{ post.updated_at.strftime('%Y-%m-%d %H:%M') if post.updated_at else post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                </li>
+            </ul>
+        </div>
         
-        <!-- 附件显示 -->
-        {% if post.attachments.count() > 0 %}
-        <div class="mt-4 pt-3 border-top">
-            <h6><i class="fas fa-paperclip me-1"></i>附件 ({{ post.attachments.count() }})</h6>
-            <div class="row g-2">
-                {% for attachment in post.attachments %}
-                <div class="col-md-6">
-                    <div class="attachment-item d-flex align-items-center">
-                        <i class="fas fa-file me-2 text-primary"></i>
-                        <div class="flex-grow-1">
-                            <a href="{{ url_for('main.download_attachment', attachment_id=attachment.id) }}" target="_blank" class="text-decoration-none">{{ attachment.filename }}</a>
-                            <div class="small text-muted">{{ "%.2f"|format(attachment.file_size/1024) }} KB</div>
-                        </div>
+        <!-- 作者信息 -->
+        <div class="post-card mb-4">
+            <h4 class="mb-3"><i class="fas fa-user me-2 text-primary"></i>作者信息</h4>
+            <div class="text-center">
+                {% if post.author.avatar and post.author.avatar != 'default.jpg' %}
+                    <img src="{{ url_for('static', filename='uploads/' + post.author.avatar) }}" alt="{{ post.author.username }}" class="user-avatar mb-3">
+                {% else %}
+                    <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ post.author.username }}" class="user-avatar mb-3">
+                {% endif %}
+                <h5>{{ post.author.username }}</h5>
+                <p class="text-muted">{{ post.author.bio or '暂无个人简介' }}</p>
+                <a href="{{ url_for('main.user_detail', user_id=post.author.id) }}" class="btn btn-outline-primary btn-sm">查看资料</a>
+            </div>
+        </div>
+        
+<!-- 相关帖子 -->
+        <div class="post-card">
+            <h4 class="mb-3"><i class="fas fa-link me-2 text-success"></i>相关帖子</h4>
+            <div class="list-group">
+                {% for related_post in related_posts %}
+                <a href="{{ url_for('main.post_detail', post_id=related_post.id) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-truncate" style="max-width: 70%;">{{ related_post.title }}</span>
+                        <span class="badge bg-secondary">{{ related_post.comments.count() }}</span>
                     </div>
-                </div>
+                    <small class="text-muted">{{ related_post.created_at.strftime('%Y-%m-%d') }}</small>
+                </a>
                 {% endfor %}
             </div>
         </div>
-        {% endif %}
+    </div>
 </div>
+{% endblock %}
 
-<!-- 回复列表 -->
-<h3 class="mt-5 mb-4">{{ post.comments.count() }} 条回复</h3>
-{% for comment in post.comments %}
-<div class="card mb-3 shadow-sm">
-    <div class="card-body">
-        <div class="d-flex">
-            <img src="{{ url_for('static', filename='images/default-avatar.png') }}" alt="Avatar" class="rounded-circle me-3" width="40" height="40">
-            <div class="flex-grow-1">
-                <div class="d-flex justify-content-between">
-                    <h6 class="mb-1">
-                        <a href="{{ url_for('main.user_detail', user_id=comment.author.id) }}" class="text-decoration-none">{{ comment.author.username }}</a>
-                    </h6>
-                    <small class="text-muted">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+{% block extra_js %}
+<!-- 举报模态框 -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="POST" id="reportForm">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="modal-header">
+                    <h5 class="modal-title">举报内容</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mt-2">
-                    {{ comment.get_content_html()|safe }}
+                <div class="modal-body">
+                    <input type="hidden" id="reportType" name="entity_type">
+                    <input type="hidden" id="reportId" name="entity_id">
+                    <div class="mb-3">
+                        <label for="reportReason" class="form-label">举报理由</label>
+                        <textarea class="form-control" id="reportReason" name="reason" rows="4" placeholder="请详细说明举报理由..." required></textarea>
+                    </div>
                 </div>
-            </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="submit" class="btn btn-warning">提交举报</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
-{% endfor %}
 
-<!-- 回复表单 -->
-{% if current_user.is_authenticated %}
-<div class="card shadow-sm mt-4">
-    <div class="card-body">
-        <h4 class="card-title">发表回复</h4>
-        <form method="POST" action="{{ url_for('main.add_comment', post_id=post.id) }}">
-            <div class="mb-3">
-                <textarea class="form-control" name="content" rows="4" placeholder="请输入您的回复..." required></textarea>
-            </div>
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fas fa-paper-plane me-1"></i>提交回复
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-{% else %}
-<div class="card shadow-sm mt-4">
-    <div class="card-body text-center">
-        <i class="fas fa-sign-in-alt fa-2x text-muted mb-3"></i>
-        <p class="mb-0">请<a href="{{ url_for('main.login') }}" class="text-decoration-none">登录</a>后发表回复</p>
-    </div>
-</div>
-{% endif %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 举报模态框事件
+        const reportModal = document.getElementById('reportModal');
+        reportModal.addEventListener('show.bs.modal', function(event) {
+            const button = event.relatedTarget;
+            const type = button.getAttribute('data-type');
+            const id = button.getAttribute('data-id');
+            
+            const modal = this;
+            modal.querySelector('#reportType').value = type;
+            modal.querySelector('#reportId').value = id;
+            modal.querySelector('#reportForm').action = '/report/' + type + '/' + id;
+        });
+    });
+</script>
 {% endblock %}

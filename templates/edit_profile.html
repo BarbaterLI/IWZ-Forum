@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}编辑资料 - 论坛系统{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="post-card">
+            <h2 class="text-center mb-4">编辑个人资料</h2>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <div class="mb-4 text-center">
+                    <label for="avatar" class="form-label">头像</label>
+                    <div class="mb-3">
+                        {% if current_user.avatar and current_user.avatar != 'default.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" alt="{{ current_user.username }}" class="user-avatar mb-3">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="默认头像" class="user-avatar mb-3">
+                        {% endif %}
+                    </div>
+                    <input type="file" class="form-control" id="avatar" name="avatar" accept=".png,.jpg,.jpeg,.gif,.bmp">
+                    <div class="form-text mt-2">支持 PNG, JPG, JPEG, GIF, BMP 格式，上传后将自动压缩为 512x512 像素</div>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">用户名</label>
+                    <input type="text" class="form-control" id="username" name="username" value="{{ current_user.username }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">邮箱</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ current_user.email }}" required>
+                </div>
+                <div class="mb-3">
+                    <label for="bio" class="form-label">个人简介</label>
+                    <textarea class="form-control" id="bio" name="bio" rows="4" placeholder="介绍一下自己吧...">{{ current_user.bio or '' }}</textarea>
+                </div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="{{ url_for('main.profile') }}" class="btn btn-secondary">取消</a>
+                    <button type="submit" class="btn btn-primary">更新资料</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

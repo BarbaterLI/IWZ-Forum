@@ -3,11 +3,13 @@
 {% block title %}标签: {{ tag.name }}{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">标签: {{ tag.name }}</h2>
+<div class="post-card mb-4">
+    <h2 class="mb-0"><i class="fas fa-tag me-2 text-info"></i>标签: {{ tag.name }}</h2>
+</div>
 
 {% if posts %}
     {% for post in posts %}
-    <div class="post-card">
+    <div class="post-card mb-3">
         <h3 class="post-title">
             <a href="{{ url_for('main.post_detail', post_id=post.id) }}" class="text-decoration-none">{{ post.title }}</a>
             {% if post.is_essence %}
@@ -29,13 +31,13 @@
         </div>
         {% endif %}
         <div class="post-content">
-            {{ post.content[:200] | striptags }}{% if post.content | striptags | length > 200 %}...{% endif %}
+            {{ post.get_content_preview(200) }}
         </div>
     </div>
     {% endfor %}
 {% else %}
-    <div class="post-card">
-        <p class="text-center">该标签下暂无帖子。</p>
+    <div class="post-card text-center">
+        <p class="mb-0">该标签下暂无帖子。</p>
     </div>
 {% endif %}
 {% endblock %}

@@ -3,37 +3,83 @@
 {% block title %}与 {{ user.username }} 的对话{% endblock %}
 
 {% block content %}
-<h2 class="mb-4">与 {{ user.username }} 的对话</h2>
+<div class="post-card mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <h2 class="mb-0"><i class="fas fa-comments me-2"></i>与 {{ user.username }} 的对话</h2>
+        <a href="{{ url_for('advanced.messages') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-1"></i>返回消息列表
+        </a>
+    </div>
+</div>
 
 <div class="post-card">
-    <div class="message-list mb-4" style="max-height: 400px; overflow-y: auto;">
-        {% for message in messages %}
-        <div class="message {% if message.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %} mb-3">
-            <div class="d-flex {% if message.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
-                <div class="message-content p-3 rounded 
-                     {% if message.sender_id == current_user.id %}bg-primary-light{% else %}bg-secondary-light{% endif %}">
-                    <div class="message-text">{{ message.content }}</div>
-                    <div class="message-time text-muted small mt-1">
-                        {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
-                        {% if message.sender_id == current_user.id and message.is_read %}
-                        <i class="fas fa-check-double text-primary"></i>
-                        {% elif message.sender_id == current_user.id %}
-                        <i class="fas fa-check text-muted"></i>
+    <!-- 消息列表 -->
+    <div class="message-list mb-4" style="max-height: 500px; overflow-y: auto; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f8f9fa;">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="message {% if message.sender_id == current_user.id %}message-sent{% else %}message-received{% endif %} mb-3">
+                <div class="d-flex {% if message.sender_id == current_user.id %}justify-content-end{% else %}justify-content-start{% endif %}">
+                    {% if message.sender_id != current_user.id %}
+                        {% if user.avatar and user.avatar != 'default.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + user.avatar) }}" alt="{{ user.username }}" class="user-avatar-sm me-2" style="width: 30px; height: 30px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ user.username }}" class="user-avatar-sm me-2" style="width: 30px; height: 30px;">
                         {% endif %}
+                    {% endif %}
+                    <div class="message-content p-3 rounded 
+                         {% if message.sender_id == current_user.id %}bg-primary-light{% else %}bg-secondary-light{% endif %}"
+                         style="max-width: 70%;">
+                        <div class="message-text">{{ message.content }}</div>
+                        <div class="message-time text-muted small mt-1">
+                            {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+                            {% if message.sender_id == current_user.id and message.is_read %}
+                            <i class="fas fa-check-double text-primary"></i>
+                            {% elif message.sender_id == current_user.id %}
+                            <i class="fas fa-check text-muted"></i>
+                            {% endif %}
+                        </div>
                     </div>
+                    {% if message.sender_id == current_user.id %}
+                        {% if current_user.avatar and current_user.avatar != 'default.jpg' %}
+                            <img src="{{ url_for('static', filename='uploads/' + current_user.avatar) }}" alt="{{ current_user.username }}" class="user-avatar-sm ms-2" style="width: 30px; height: 30px;">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/default-avatar.svg') }}" alt="{{ current_user.username }}" class="user-avatar-sm ms-2" style="width: 30px; height: 30px;">
+                        {% endif %}
+                    {% endif %}
                 </div>
             </div>
-        </div>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="fas fa-comments fa-2x mb-3"></i>
+                <p>暂无消息，开始对话吧</p>
+            </div>
+        {% endif %}
     </div>
 
+    <!-- 发送消息表单 -->
     <form method="POST" action="{{ url_for('advanced.send_message', user_id=user.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
         <div class="mb-3">
             <textarea class="form-control" name="content" rows="3" placeholder="输入消息..." required></textarea>
         </div>
         <div class="d-grid">
-            <button type="submit" class="btn btn-primary">发送消息</button>
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-paper-plane me-1"></i>发送消息
+            </button>
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// 滚动到消息列表底部
+document.addEventListener('DOMContentLoaded', function() {
+    const messageList = document.querySelector('.message-list');
+    if (messageList) {
+        messageList.scrollTop = messageList.scrollHeight;
+    }
+});
+</script>
 {% endblock %}
